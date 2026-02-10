@@ -1,14 +1,22 @@
-version: '3.9'
 services:
-  dns:
-    build: .
+  'domain':
+    image: 'nginx:1.29.4-alpine@sha256:1e462d5b3fe0bc6647a9fbba5f47924b771254763e8a51b638842890967e477e'
+    ports:
+      - '80:80'
+      # - '443:443'
+  'dns':
+    container_name: 'dns'
+    build:
+      context: '.'
+      dockerfile: './Dockerfile'
     restart: 'unless-stopped'
     volumes:
       - '/etc/localtime:/etc/localtime:ro'
       - './dnsmasq.conf:/etc/dnsmasq.conf:ro'
     ports:
-      - '53:53/tcp'
-      - '53:53/udp'
+      - '53:5353/tcp'
+      - '53:5353/udp'
     extra_hosts:
-      # add your DNS entries here
-      - 'foo.bar:192.168.0.1'
+      # Replace example.com with the domain to spoof
+      - 'example.com:127.0.0.1'
+      - 'example.com:[::1]'
