@@ -1,22 +1,58 @@
 services:
   'domain':
-    image: 'nginx:1.29.4-alpine@sha256:1e462d5b3fe0bc6647a9fbba5f47924b771254763e8a51b638842890967e477e'
+    restart: 'unless-stopped'
+    image: 'mitmproxy/mitmproxy:12.2.1'
+    command: [
+      "mitmdump",
+      # Replace example.com with the domain to spoof
+      # https://docs.mitmproxy.org/stable/concepts/modes/#reverse-proxy
+      "--mode", "reverse:https://www.example.com@8080",
+      "-w", "/logs/output"
+    ]
+    environment:
+      # https://github.com/mitmproxy/mitmproxy/issues/7986
+      - PYTHONUNBUFFERED=1
     ports:
-      - '80:80'
-      # - '443:443'
+      - '80:8080'
+      - '443:8080'
+    volumes:
+      - type: 'bind'
+        source: './logs/'
+        target: '/logs/'
+    sysctls:
+      - 'net.ipv6.conf.all.disable_ipv6=0'
+    # Replace IPs with your DNS 
+    # https://quad9.net/service/service-addresses-and-features/#unsec
+    dns:
+      - '2620:fe::10'
+      - '2620:fe::fe:10'
+      - '9.9.9.10'
+      - '149.112.112.10'
   'dns':
     container_name: 'dns'
-    build:
-      context: '.'
-      dockerfile: './Dockerfile'
     restart: 'unless-stopped'
-    volumes:
-      - '/etc/localtime:/etc/localtime:ro'
-      - './dnsmasq.conf:/etc/dnsmasq.conf:ro'
+    image: 'mitmproxy/mitmproxy:12.2.1'
+    command: [ "mitmdump", "--mode", "dns@53" ]
+    environment:
+      # https://github.com/mitmproxy/mitmproxy/issues/7986
+      - PYTHONUNBUFFERED=1
     ports:
-      - '53:5353/tcp'
-      - '53:5353/udp'
+      - '53:53/tcp'
+      - '53:53/udp'
+    volumes:
+      - type: 'bind'
+        source: '/etc/localtime'
+        target: '/etc/localtime'
+        read_only: true
+    sysctls:
+      - 'net.ipv6.conf.all.disable_ipv6=0'
     extra_hosts:
       # Replace example.com with the domain to spoof
       - 'example.com:127.0.0.1'
       - 'example.com:[::1]'
+      - 'www.example.com:127.0.0.1'
+      - 'www.example.com:[::1]'
+networks:
+  default:
+    enable_ipv4: true
+    enable_ipv6: true
