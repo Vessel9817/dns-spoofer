@@ -1,0 +1,24 @@
+services:
+  'domain':
+    restart: 'unless-stopped'
+    # https://docs.mitmproxy.org/stable/concepts/modes/
+    image: 'mitmproxy/mitmproxy:12.2.1'
+    environment:
+      # https://github.com/mitmproxy/mitmproxy/issues/7986
+      - PYTHONUNBUFFERED=1
+    ports:
+      - '80:8080'
+      - '443:8080'
+    volumes:
+      - type: 'bind'
+        source: '../logs/'
+        target: '/logs/'
+    sysctls:
+      - 'net.ipv6.conf.all.disable_ipv6=0'
+    # Replace IPs with your DNS 
+    # https://quad9.net/service/service-addresses-and-features/#unsec
+    dns:
+      - '2620:fe::10'
+      - '2620:fe::fe:10'
+      - '9.9.9.10'
+      - '149.112.112.10'

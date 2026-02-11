@@ -1,33 +1,15 @@
 services:
-  'domain':
-    restart: 'unless-stopped'
-    image: 'mitmproxy/mitmproxy:12.2.1'
+  'example-domain':
+    extends:
+      file: './domain/docker-compose.yml'
+      service: 'domain'
+    container_name: 'example-domain'
     command: [
       "mitmdump",
       # Replace example.com with the domain to spoof
-      # https://docs.mitmproxy.org/stable/concepts/modes/#reverse-proxy
       "--mode", "reverse:https://www.example.com@8080",
-      "-w", "/logs/output"
+      "-w", "/logs/example.bin"
     ]
-    environment:
-      # https://github.com/mitmproxy/mitmproxy/issues/7986
-      - PYTHONUNBUFFERED=1
-    ports:
-      - '80:8080'
-      - '443:8080'
-    volumes:
-      - type: 'bind'
-        source: './logs/'
-        target: '/logs/'
-    sysctls:
-      - 'net.ipv6.conf.all.disable_ipv6=0'
-    # Replace IPs with your DNS 
-    # https://quad9.net/service/service-addresses-and-features/#unsec
-    dns:
-      - '2620:fe::10'
-      - '2620:fe::fe:10'
-      - '9.9.9.10'
-      - '149.112.112.10'
   'dns':
     container_name: 'dns'
     restart: 'unless-stopped'
