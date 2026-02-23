@@ -1,40 +1,136 @@
 services:
-  'example-domain':
-    extends:
-      file: './domain/docker-compose.yml'
-      service: 'domain'
-    container_name: 'example-domain'
-    command: [
-      "mitmdump",
-      # Replace example.com with the domain to spoof
-      "--mode", "reverse:https://www.example.com@8080",
-      "-w", "/logs/example.bin"
-    ]
   'dns':
     container_name: 'dns'
+    hostname: 'dns'
     restart: 'unless-stopped'
     image: 'mitmproxy/mitmproxy:12.2.1'
-    command: [ "mitmdump", "--mode", "dns@53" ]
+    command: [ "mitmdump", "--mode", "dns" ]
     environment:
       # https://github.com/mitmproxy/mitmproxy/issues/7986
-      - PYTHONUNBUFFERED=1
-    ports:
-      - '53:53/tcp'
-      - '53:53/udp'
+      'PYTHONUNBUFFERED': 1
     volumes:
       - type: 'bind'
         source: '/etc/localtime'
         target: '/etc/localtime'
         read_only: true
+      - type: 'volume'
+        source: 'mitmproxy'
+        target: '/home/mitmproxy/.mitmproxy'
     sysctls:
-      - 'net.ipv6.conf.all.disable_ipv6=0'
+      'net.ipv6.conf.all.disable_ipv6': 0
+    networks:
+      'vpn':
+        ipv4_address: '10.0.0.2'
     extra_hosts:
-      # Replace example.com with the domain to spoof
-      - 'example.com:127.0.0.1'
-      - 'example.com:[::1]'
-      - 'www.example.com:127.0.0.1'
-      - 'www.example.com:[::1]'
+      # Spoofed domains mapped to the proxy IP address
+      # (www.)example.com
+      - 'example.com:10.0.0.4'
+      - 'www.example.com:10.0.0.4'
+      # (www.)fakewebsite.test
+      - 'fakewebsite.test:10.0.0.5'
+      - 'www.fakewebsite.test:10.0.0.5'
+      # (www.)example.org
+      - 'example.org:10.0.0.6'
+      - 'www.example.org:10.0.0.6'
+  'vpn':
+    container_name: 'vpn'
+    hostname: 'vpn'
+    restart: 'unless-stopped'
+    depends_on:
+      - 'dns'
+      - 'example-domain'
+      - 'test-domain'
+      - 'block-domain'
+    image: 'ghcr.io/wg-easy/wg-easy:14'
+    volumes:
+      - type: 'bind'
+        source: '/lib/modules'
+        target: '/lib/modules'
+      - type: 'volume'
+        source: 'wireguard'
+        target: '/etc/wireguard'
+    env_file:
+      - './.env'
+    ports:
+      - '51820:51820/udp'
+      - '51821:51821'
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    sysctls:
+      'net.ipv4.ip_forward': 1
+      'net.ipv4.conf.all.src_valid_mark': 1
+      'net.ipv6.conf.all.disable_ipv6': 0
+    networks:
+      'vpn':
+        ipv4_address: '10.0.0.3'
+  'example-domain':
+    extends:
+      file: './domain/docker-compose.yml'
+      service: 'domain'
+    container_name: 'example-domain'
+    hostname: 'example-domain'
+    command: [
+      "mitmdump",
+      # Replace www.example.com with the domain to proxy
+      "--mode", "reverse:http://www.example.com@80",
+      "--mode", "reverse:https://www.example.com@443",
+      "-w", "/logs/example.bin"
+    ]
+    volumes:
+      - type: 'volume'
+        source: 'mitmproxy'
+        target: '/home/mitmproxy/.mitmproxy'
+    networks:
+      'vpn':
+        ipv4_address: '10.0.0.4'
+  'test-domain':
+    extends:
+      file: './domain/docker-compose.yml'
+      service: 'domain'
+    container_name: 'test-domain'
+    hostname: 'test-domain'
+    command: [
+      "mitmdump",
+      # Replace google.com with the domain to proxy
+      "--mode", "reverse:http://www.example.org@80",
+      "--mode", "reverse:https://www.example.org@443",
+      "-w", "/logs/test.bin"
+    ]
+    volumes:
+      - type: 'volume'
+        source: 'mitmproxy'
+        target: '/home/mitmproxy/.mitmproxy'
+    networks:
+      'vpn':
+        ipv4_address: '10.0.0.5'
+  'block-domain':
+    extends:
+      file: './domain/docker-compose.yml'
+      service: 'domain'
+    container_name: 'block-domain'
+    hostname: 'block-domain'
+    # No logging, since we're blocking the connection
+    command: [
+      "mitmdump",
+      "--mode", "reverse:http://255.255.255.255@80",
+      "--mode", "reverse:https://255.255.255.255@443",
+    ]
+    volumes:
+      - type: 'volume'
+        source: 'mitmproxy'
+        target: '/home/mitmproxy/.mitmproxy'
+    networks:
+      'vpn':
+        ipv4_address: '10.0.0.6'
 networks:
-  default:
+  'vpn':
     enable_ipv4: true
     enable_ipv6: true
+    ipam:
+      config:
+        - subnet: '10.0.0.0/24' # 10.0.0.*
+          gateway: '10.0.0.1'
+volumes:
+  'mitmproxy':
+  'wireguard':
