@@ -21,13 +21,20 @@ services:
     networks:
       'vpn':
         ipv4_address: '10.0.0.2'
+        ipv6_address: 'fd00::2'
     extra_hosts:
       # Spoofed domains mapped to the proxy IP address
+      - 'example.com=[fd00::4]'
       - 'example.com=10.0.0.4'
+      - 'www.example.com=[fd00::4]'
       - 'www.example.com=10.0.0.4'
+      - 'fakewebsite.test=[fd00::5]'
       - 'fakewebsite.test=10.0.0.5'
+      - 'www.fakewebsite.test=[fd00::5]'
       - 'www.fakewebsite.test=10.0.0.5'
+      - 'example.org=[fd00::6]'
       - 'example.org=10.0.0.6'
+      - 'www.example.org=[fd00::6]'
       - 'www.example.org=10.0.0.6'
   'vpn':
     container_name: 'vpn'
@@ -61,6 +68,7 @@ services:
     networks:
       'vpn':
         ipv4_address: '10.0.0.3'
+        ipv6_address: 'fd00::3'
   'example-domain':
     extends:
       file: './domain/docker-compose.yml'
@@ -82,6 +90,7 @@ services:
     networks:
       'vpn':
         ipv4_address: '10.0.0.4'
+        ipv6_address: 'fd00::4'
   'test-domain':
     extends:
       file: './domain/docker-compose.yml'
@@ -103,6 +112,7 @@ services:
     networks:
       'vpn':
         ipv4_address: '10.0.0.5'
+        ipv6_address: 'fd00::5'
   'block-domain':
     extends:
       file: './domain/docker-compose.yml'
@@ -123,13 +133,16 @@ services:
     networks:
       'vpn':
         ipv4_address: '10.0.0.6'
+        ipv6_address: 'fd00::6'
 networks:
   'vpn':
     enable_ipv4: true
     enable_ipv6: true
     ipam:
       config:
-        - subnet: '10.0.0.0/24' # 10.0.0.*
+        - subnet: 'fc00::/7'
+          gateway: 'fd00::1'
+        - subnet: '10.0.0.0/8'
           gateway: '10.0.0.1'
 volumes:
   'mitmproxy':
