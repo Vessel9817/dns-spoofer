@@ -23,15 +23,12 @@ services:
         ipv4_address: '10.0.0.2'
     extra_hosts:
       # Spoofed domains mapped to the proxy IP address
-      # (www.)example.com
-      - 'example.com:10.0.0.4'
-      - 'www.example.com:10.0.0.4'
-      # (www.)fakewebsite.test
-      - 'fakewebsite.test:10.0.0.5'
-      - 'www.fakewebsite.test:10.0.0.5'
-      # (www.)example.org
-      - 'example.org:10.0.0.6'
-      - 'www.example.org:10.0.0.6'
+      - 'example.com=10.0.0.4'
+      - 'www.example.com=10.0.0.4'
+      - 'fakewebsite.test=10.0.0.5'
+      - 'www.fakewebsite.test=10.0.0.5'
+      - 'example.org=10.0.0.6'
+      - 'www.example.org=10.0.0.6'
   'vpn':
     container_name: 'vpn'
     hostname: 'vpn'
