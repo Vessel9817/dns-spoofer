@@ -9,3 +9,4 @@ temp
 *.env
 !*.env.example
 *.conf
+*.har

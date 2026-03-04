@@ -33,11 +33,6 @@ services:
     container_name: 'vpn'
     hostname: 'vpn'
     restart: 'unless-stopped'
-    depends_on:
-      - 'dns'
-      - 'example-domain'
-      - 'test-domain'
-      - 'block-domain'
     image: 'ghcr.io/wg-easy/wg-easy:14'
     volumes:
       - type: 'bind'
@@ -73,7 +68,7 @@ services:
       # Replace www.example.com with the domain to proxy
       "--mode", "reverse:http://www.example.com@80",
       "--mode", "reverse:https://www.example.com@443",
-      "-w", "/logs/example.bin"
+      "--set", "hardump=/logs/example.har"
     ]
     volumes:
       - type: 'volume'
@@ -94,7 +89,7 @@ services:
       # Replace google.com with the domain to proxy
       "--mode", "reverse:http://www.example.org@80",
       "--mode", "reverse:https://www.example.org@443",
-      "-w", "/logs/test.bin"
+      "--set", "hardump=/logs/test.har"
     ]
     volumes:
       - type: 'volume'
