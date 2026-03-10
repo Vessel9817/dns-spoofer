@@ -29,6 +29,7 @@ services:
       - 'www.fakewebsite.test=10.0.0.5'
       - 'example.org=10.0.0.6'
       - 'www.example.org=10.0.0.6'
+      - 'echo.websocket.org=10.0.0.7'
   'vpn':
     container_name: 'vpn'
     hostname: 'vpn'
@@ -118,6 +119,27 @@ services:
     networks:
       'vpn':
         ipv4_address: '10.0.0.6'
+  'ws-domain':
+    extends:
+      file: './domain/docker-compose.yml'
+      service: 'domain'
+    container_name: 'ws-domain'
+    hostname: 'ws-domain'
+    # Replace echo.websocket.org with the domain to proxy
+    command: [
+      "mitmdump",
+      "--ssl-insecure",
+      "--mode", "reverse:http://echo.websocket.org@80",
+      "--mode", "reverse:https://echo.websocket.org@443",
+      "--set", "hardump=/logs/ws.har"
+    ]
+    volumes:
+      - type: 'volume'
+        source: 'mitmproxy'
+        target: '/home/mitmproxy/.mitmproxy'
+    networks:
+      'vpn':
+        ipv4_address: '10.0.0.7'
 networks:
   'vpn':
     enable_ipv4: true
