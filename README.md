@@ -80,6 +80,19 @@ docker compose down
 For configuring your own domains to MITM, see:
 [docker-compose.yml](./docker-compose.yml)
 
+## Advanced
+
+Additionally, it's possible to manage individual proxy services, as defined in
+[docker-compose.yml](./docker-compose.yml):
+
+```shell
+# Start
+docker compose up -d <service_name_1> <service_name_2> <...>
+
+# Stop
+docker compose down <service_name_1> <service_name_2> <...>
+```
+
 ## Limitations
 
 This project currently doesn't:
