@@ -44,6 +44,9 @@ services:
         target: '/etc/wireguard'
     env_file:
       - './.env'
+    environment:
+      'WG_DEFAULT_DNS': '10.0.0.2'
+      'WG_ALLOWED_IPS': '10.0.0.0/24'
     ports:
       - '51820:51820/udp'
       - '51821:51821'

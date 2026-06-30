@@ -1,61 +1,99 @@
-# Simple DNS server using docker-compose and dnsmasq
+# DNS Spoofer
 
-[![Docker Image](https://github.com/Vessel9817/dns-spoofer/actions/workflows/ci.yml/badge.svg)](https://github.com/Vessel9817/dns-spoofer/actions/workflows/ci.yml)
+[![CI](https://github.com/Vessel9817/dns-spoofer/actions/workflows/ci.yml/badge.svg)](https://github.com/Vessel9817/dns-spoofer/actions/workflows/ci.yml)
 
-This repository showcases how you can easily set up a simple DNS server using `dnsmasq` and `docker-compose`/`docker`.
-DNS entries can be added directly via the `docker-compose.yml` file, which can be easily automated (e.g. via ansible).
+This project is a practical demo of DNS spoofing, which allows you to perform
+man-in-the-middle (MITM) attacks on users of this service. This bypasses some
+security measures, such as certain HTTPS protections.
 
-Such a simple DNS server is ideal for internal use (e.g. at home or within a wireguard/tailscale VPN network).
+**This is a tool that should be used responsibly.**
 
-## Option 1 - `docker-compose`
+## Installation
 
-Change the DNS entries in the `extra_hosts` section in `docker-compose.yml`. The DNS server can be started by running
+- Install Docker Desktop
+- Install WireGuard
+- Rename [.env.example](./.env.example) to `.env` and modify its values:
 
-```bash
-docker-compose up -d
+  - Set `WG_HOST` to the output of the following command:
+
+    ```shell
+    # Linux
+    hostname -I
+
+    # Windows
+    wsl -- hostname -I
+    ```
+
+    This will tell the VPN to relay connections from your device.
+
+  - Set `PASSWORD_HASH` to the output of the following command:
+
+    ```shell
+    docker run --rm ghcr.io/wg-easy/wg-easy:14 wgpw 'WhateverPasswordYouWant'
+    ```
+
+    Where `WhateverPasswordYouWant` can be any password of your choosing.
+    This is the password used in the example config, so it's strongly advised.
+    to change it. Make sure to escape shell characters appropriately.
+    This is the password to the VPN admin portal.
+
+- [Configure](#configuration) the project to your liking
+- Start the project by running the following command in the project root:
+
+  ```shell
+  docker compose up -d
+  ```
+
+- Visit the VPN admin portal at: `localhost:51821`
+- Log in using the previously set password
+- Click "Add a new client"
+- Click "Download Configuration" and save the configuration file somewhere safe.
+- Open WireGuard
+- Click "Import tunnel from configuration file"
+- Click "Activate tunnel"
+
+You're now connected to your DNS spoofing service.
+
+## Usage
+
+### Start
+
+Assuming you've completed the [initial configuration](#installation),
+start the containers:
+
+```shell
+docker compose up -d
 ```
 
-from the project directory.
+Then, open WireGuard and connect to your VPN.
 
-By default, the DNS server will listen all IP addresses/interfaces (equivalent to `0.0.0.0`). This can be changed in the `ports` section by changing `53:53/tcp` to `<IP address>:53:53/tcp` etc.
+### Stop
 
-The server can be stopped by running
+Disconnect from the VPN via WireGuard. Then, stop the containers:
 
-```bash
-docker-compose down
+```shell
+docker compose down
 ```
 
-from the project directory.
+## Configuration
 
-`dnsmasq` can be configured by modifying the `dnsmasq.conf` file. After changing this file, it is necessary to first bring the server down and restart using the aforementioned commands.
+For configuring your own domains to MITM, see:
+[docker-compose.yml](./docker-compose.yml)
 
-## Option 2 - Plain `docker`
+## Limitations
 
-The server can be run with plain `docker` commands as well. First, the docker image is built using
+This project currently doesn't:
 
-```bash
-docker build -t simple-docker-dns .
-```
+- Expose a certificate authority (CA) for applications to query.
+  Though, spoofing may be possible.
+- Rewrite headers, such as Location or Content-Security-Policy
+- Rewrite HTML, such as absolute URLs
+- Bypass HSTS
+- Support mDNS, though it remains untested
+- Perform HTTPS downgrading attacks
+- Prevent applications, such as browsers, from reaching other DNS services
+- Bypass DNSSEC
 
-and then started with
+This project cannot:
 
-```bash
-docker run -d --name dns_service \
-  --restart unless-stopped \
-  -v /etc/localtime:/etc/localtime:ro \
-  -v $(pwd)/dnsmasq.conf:/etc/dnsmasq.conf:ro \
-  -p 53:53/tcp \
-  -p 53:53/udp \
-  --add-host foo.bar:192.168.0.1 \
-  simple-docker-dns
-```
-
-The DNS entries are specified using `--add-host <entry>`.
-
-The server can subequently be stopped using
-
-```bash
-docker stop simple-docker-dns
-```
-
-`dnsmasq` can be configured by modifying the `dnsmasq.conf` file. After changing this file, it is necessary to first bring the server down, rebuild the docker image and finally start it again.
+- Fool applications with an embedded public key. You require the domain's private key to generate a verifiable certificate.
