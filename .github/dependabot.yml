@@ -5,9 +5,11 @@
 
 version: 2
 updates:
-  # Enable version updates for Docker
   - package-ecosystem: "docker"
-    # Look for Dockerfiles
+    directory: "/"
+    schedule:
+      interval: "daily" # weekdays
+  - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "daily"
