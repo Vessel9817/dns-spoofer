@@ -99,6 +99,7 @@ This project currently doesn't:
 
 - Expose a [certificate authority (CA)][ca] for applications to query.
   Though, spoofing may be possible.
+- Support [ARP spoofing][arp-spoof]
 - Rewrite [headers][headers], such as [`Location`][location]
   or [`Content-Security-Policy`][csp]
 - Rewrite HTML, such as absolute URLs or [`base` elements][base-element].
@@ -126,6 +127,7 @@ This project cannot:
   [PQXDH][pqxdh] make this impossible.
 
 [ca]: https://www.digicert.com/blog/what-is-a-certificate-authority
+[arp-spoof]: https://www.crowdstrike.com/en-us/cybersecurity-101/social-engineering/arp-spoofing/
 [headers]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers
 [location]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Location
 [csp]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy
