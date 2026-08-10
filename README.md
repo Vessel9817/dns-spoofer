@@ -101,7 +101,8 @@ This project currently doesn't:
   Though, spoofing may be possible.
 - Rewrite headers, such as Location or Content-Security-Policy
 - Rewrite HTML, such as absolute URLs
-- Bypass HSTS
+- Bypass HSTS. Though spoofing Google's [HSTS preload][hsts-preload] service
+  could certainly give the impression of doing so.
 - Support mDNS, though it remains untested
 - Perform HTTPS downgrading attacks
 - Prevent applications, such as browsers, from reaching other DNS services
@@ -110,3 +111,5 @@ This project currently doesn't:
 This project cannot:
 
 - Fool applications with an embedded public key. You require the domain's private key to generate a verifiable certificate.
+
+[hsts-preload]: https://hstspreload.org/
