@@ -6,7 +6,7 @@ This project is a practical demo of DNS spoofing, which allows you to perform
 man-in-the-middle (MITM) attacks on users of this service. This bypasses some
 security measures, such as certain HTTPS protections.
 
-**This is a tool that should be used responsibly.**
+**This is a tool that should be used responsibly and ethically.**
 
 ## Installation
 
@@ -97,19 +97,47 @@ docker compose down <service_name_1> <service_name_2> <...>
 
 This project currently doesn't:
 
-- Expose a certificate authority (CA) for applications to query.
+- Expose a [certificate authority (CA)][ca] for applications to query.
   Though, spoofing may be possible.
-- Rewrite headers, such as Location or Content-Security-Policy
-- Rewrite HTML, such as absolute URLs
-- Bypass HSTS. Though spoofing Google's [HSTS preload][hsts-preload] service
-  could certainly give the impression of doing so.
-- Support mDNS, though it remains untested
-- Perform HTTPS downgrading attacks
-- Prevent applications, such as browsers, from reaching other DNS services
-- Bypass DNSSEC
+- Rewrite [headers][headers], such as [`Location`][location]
+  or [`Content-Security-Policy`][csp]
+- Rewrite HTML, such as absolute URLs or [`base` elements][base-element].
+- Bypass [HSTS][hsts]. Though, spoofing Google's [HSTS preload][hsts-preload]
+  service could certainly give the impression of doing so.
+- Support [mDNS][mdns]. Though, it remains untested.
+- Perform HTTPS [downgrading attacks][downgrade]
+- Prevent applications from reaching other [DNS][dns] servers
+- Bypass [DNSSEC][dnssec]
+- Bypass [mTLS][mtls]
+- Intercept `.onion` domains. The entirely volunteer-driven
+  [Tor network][tor-design] is designed to be decentralized and anonymous. Its
+  design is highly hardened against malicious actors in any area of the network,
+  making it suitable for [circumventing censorship][bridges]. The complexity
+  involved in such a specialized attack is outside this project's scope.
+  The dark web- and especially the deep web- as a whole should be similarly
+  defensible.
 
 This project cannot:
 
-- Fool applications with an embedded public key. You require the domain's private key to generate a verifiable certificate.
+- Fool applications with an embedded public key. The domain's private key
+  is required to generate a verifiable certificate.
+- Listen in on end-to-end encrypted communication channels.
+  [Diffie-Hellman key exchange][diffie-hellman] and its post-quantum successor
+  [PQXDH][pqxdh] make this impossible.
 
+[ca]: https://www.digicert.com/blog/what-is-a-certificate-authority
+[headers]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers
+[location]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Location
+[csp]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy
+[base-element]: https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/base#href
+[hsts]: https://developer.mozilla.org/en-US/docs/Glossary/HSTS
 [hsts-preload]: https://hstspreload.org/
+[mdns]: https://wikipedia.org/wiki/Multicast_DNS
+[downgrade]: https://www.crowdstrike.com/en-us/cybersecurity-101/cyberattacks/downgrade-attack/
+[dns]: https://www.cloudflare.com/learning/dns/what-is-dns/
+[dnssec]: https://www.cloudflare.com/learning/dns/dnssec/how-dnssec-works/
+[mtls]: https://www.cloudflare.com/learning/access-management/what-is-mutual-tls/
+[diffie-hellman]: https://en.wikipedia.org/wiki/Diffie%E2%80%93Hellman_key_exchange
+[pqxdh]: https://signal.org/docs/specifications/pqxdh/
+[tor-design]: https://github.com/Attacks-on-Tor/Attacks-on-Tor
+[bridges]: https://support.torproject.org/relays/getting-started/what-is-a-bridge/
