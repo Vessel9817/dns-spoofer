@@ -1,5 +1,6 @@
 on:
   push:
+  pull_request:
 
 env:
   DOCKER_COMPOSE_VERSION: v5.5.1
