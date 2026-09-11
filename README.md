@@ -1,6 +1,7 @@
 # DNS Spoofer
 
-[![CI](https://github.com/Vessel9817/dns-spoofer/actions/workflows/ci.yml/badge.svg)](https://github.com/Vessel9817/dns-spoofer/actions/workflows/ci.yml)
+[![MIT license][license-badge]](LICENSE)
+[![CI][ci-badge]][ci-workflow]
 
 This project is a practical demo of DNS spoofing, which allows you to perform
 man-in-the-middle (MITM) attacks on users of this service. This bypasses some
@@ -126,6 +127,9 @@ This project cannot:
   [Diffie-Hellman key exchange][diffie-hellman] and its post-quantum successor
   [PQXDH][pqxdh] make this impossible.
 
+[license-badge]: https://raw.githubusercontent.com/Vessel9817/dns-spoofer/refs/heads/main/badge.svg
+[ci-badge]: https://github.com/Vessel9817/dns-spoofer/actions/workflows/ci.yml/badge.svg
+[ci-workflow]: https://github.com/Vessel9817/dns-spoofer/actions/workflows/ci.yml
 [ca]: https://www.digicert.com/blog/what-is-a-certificate-authority
 [arp-spoof]: https://www.crowdstrike.com/en-us/cybersecurity-101/social-engineering/arp-spoofing/
 [headers]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers
