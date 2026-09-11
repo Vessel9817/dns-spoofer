@@ -1,6 +1,6 @@
 # DNS Spoofer
 
-[![MIT license][license-badge]](LICENSE)
+[![MIT license][license-badge]](LICENSE.md)
 [![CI][ci-badge]][ci-workflow]
 
 This project is a practical demo of DNS spoofing, which allows you to perform
